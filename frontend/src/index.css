@@ -1,0 +1,113 @@
+/* ============================================================================
+   Mind Palace — Design System
+   Professional token system with light + dark themes.
+   ========================================================================= */
+
+@import "./styles/tokens.css";
+@import "./styles/components.css";
+@import "./styles/markdown.css";
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Smooth theme transitions on color-bearing properties only */
+body, body * {
+  transition:
+    background-color var(--motion-fast) var(--ease),
+    border-color var(--motion-fast) var(--ease),
+    color var(--motion-fast) var(--ease);
+}
+/* But don't transition transforms / interactive hover scale globally */
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover { color: var(--accent-hover); }
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  border: none;
+  background: none;
+  color: inherit;
+}
+button:disabled { cursor: not-allowed; }
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--text-primary);
+  background: var(--field-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  outline: none;
+  padding: 8px 12px;
+  transition: border-color var(--motion-fast) var(--ease),
+              box-shadow var(--motion-fast) var(--ease);
+}
+input::placeholder, textarea::placeholder { color: var(--text-faint); }
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+/* Scrollbars */
+* { scrollbar-width: thin; scrollbar-color: var(--scrollbar) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); background-clip: content-box; }
+
+/* Selection */
+::selection { background: var(--accent-ring); color: var(--text-primary); }
+
+/* Utility animations */
+@keyframes mp-spin { to { transform: rotate(360deg); } }
+@keyframes mp-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes mp-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes mp-scale-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+@keyframes mp-shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+@keyframes mp-slide-in { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+
+.mp-fade-in { animation: mp-fade-in var(--motion-base) var(--ease); }
+.mp-scale-in { animation: mp-scale-in var(--motion-base) var(--ease); }
+
+/* Skeleton loader */
+.mp-skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 37%, var(--surface-2) 63%);
+  background-size: 400px 100%;
+  animation: mp-shimmer 1.4s ease infinite;
+  border-radius: var(--radius-sm);
+}

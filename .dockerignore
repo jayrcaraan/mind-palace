@@ -1,0 +1,25 @@
+# Python
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.venv/
+**/venv/
+
+# Node / frontend build artifacts (frontend is built inside the image)
+**/node_modules/
+frontend/dist/
+backend/frontend_dist/
+
+# Secrets & local env
+**/.env
+**/.env.*
+!**/.env.example
+
+# VCS / misc
+.git/
+.gitignore
+**/*.log
+**/.DS_Store
+assets/*.png

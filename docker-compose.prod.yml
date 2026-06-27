@@ -1,0 +1,70 @@
+# Production deploy — pulls a pre-built image from your registry (no build).
+#
+#   1. Build & publish (CI or locally):
+#        docker build -f backend/Dockerfile -t $MP_IMAGE .
+#        docker push $MP_IMAGE
+#   2. On the server:
+#        export MP_IMAGE=registry.example.com/you/mind-palace:latest
+#        docker compose -f docker-compose.prod.yml pull
+#        docker compose -f docker-compose.prod.yml up -d
+#
+services:
+  postgres:
+    # Needs pgvector AND Apache AGE. Build the bundled image once and set
+    # POSTGRES_IMAGE, or build & push it to your registry:
+    #   docker build -f docker/postgres.Dockerfile -t mind-palace-db:pg16 .
+    image: ${POSTGRES_IMAGE:-mind-palace-db:pg16}
+    container_name: mp_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mindpalace}
+      POSTGRES_USER: ${POSTGRES_USER:-mindpalace}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mindpalace} -d ${POSTGRES_DB:-mindpalace}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+  mind-palace:
+    image: ${MP_IMAGE:?set MP_IMAGE to your published image}
+    container_name: mind-palace
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # All app config comes straight from .env — edit .env, nothing to add here.
+    env_file:
+      - .env
+    environment:
+      # Only values compose must derive (DB URL uses the `postgres` service host)
+      # or that are fixed to the container live here; everything else is in .env.
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-mindpalace}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-mindpalace}
+      DATABASE_URL_SYNC: postgresql+psycopg2://${POSTGRES_USER:-mindpalace}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-mindpalace}
+      BLOB_STORAGE_PATH: /data/blobs
+    volumes:
+      - blob_data:/data/blobs
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/live"]
+      interval: 30s
+      timeout: 5s
+      start_period: 25s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+
+volumes:
+  postgres_data:
+  blob_data:
